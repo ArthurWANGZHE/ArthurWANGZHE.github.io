@@ -10,11 +10,11 @@
 ############################
 
 # Name of website
-title: My Blogs
+title: 王哲的个人博客
 
 
 # Your name to show in the footer
-author: Arthur
+author: 王哲
 
 
 ###############################################
@@ -22,10 +22,13 @@ author: Arthur
 ###############################################
 
 navbar-links:
-  About Me: "aboutme"
-  Resources:
+  关于我: "aboutme"
+  简历: "Wangzhe_Resume_Undergraduate.pdf"
+  项目:
+    - GitHub: "https://github.com/ArthurWANGZHE"
+  资源:
     - Beautiful Jekyll: "https://beautifuljekyll.com"
-    - Learn markdown: "https://www.markdowntutorial.com/"
+    - 学习Markdown: "https://www.markdowntutorial.com/"
   Author's home: "https://deanattali.com"
 
 ################
@@ -52,14 +55,14 @@ round-avatar: true
 # You can change the order that they show up on the page by changing the order here.
 # Uncomment the links you want to show and add your information to each one.
 social-network-links:
-  email: "someone@example.com"
+  email: "your.email@example.com"
   rss: true  # remove this line if you don't want to show an RSS link at the bottom
-  facebook: deanattali
-  github: daattali
-  twitter: daattali
-  patreon: DeanAttali
-  youtube: "@daattali"
-  whatsapp: 15551212
+  github: ArthurWANGZHE
+#  facebook: deanattali
+#  twitter: daattali
+#  patreon: DeanAttali
+#  youtube: "@daattali"
+#  whatsapp: 15551212
 #  medium: yourname
 #  reddit: yourname or r/yoursubreddit
 #  linkedin: daattali
@@ -304,4 +307,3 @@ plugins:
 
 # Beautiful Jekyll / Dean Attali
 # 2fc73a3a967e97599c9763d05e564189
-
