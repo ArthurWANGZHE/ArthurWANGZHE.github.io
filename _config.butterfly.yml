@@ -46,8 +46,12 @@ code_blocks:
 # Formal:
 #   icon: link || the description || color
 social:
-  # fab fa-github: https://github.com/xxxxx || Github || '#24292e'
-  # fas fa-envelope: mailto:xxxxxx@gmail.com || Email || '#4a7dbe'
+   fab fa-github: https://github.com/ArthurWANGZHE || Github || '#24292e'
+   fas fa-envelope: mailto:shootingstar.arthur@gmail.com || Email || '#4a7dbe'
+   fas fa-x-twitter: https://x.com/arthur_zhe || X || '#000000'
+   fas fa-book-open: https://www.xiaohongshu.com/user/profile/67dd214e00000000040326f9 || XHS || '#d81e06'
+
+
 
 # --------------------------------------
 # Image Settings
@@ -56,7 +60,7 @@ social:
 favicon: /img/favicon.png
 
 avatar:
-  img: /img/butterfly-icon.png
+  img: /img/avatar.jpg
   effect: false
 
 # Disable all banner images
@@ -66,7 +70,7 @@ disable_top_img: false
 default_top_img:
 
 # The banner image of index page
-index_img:
+index_img: /img/background.jpg
 
 # The banner image of archive page
 archive_img:
@@ -144,26 +148,27 @@ post_meta:
 # The position of site info, eg: 300px/300em/300rem/10%
 index_site_info_top:
 # The height of top_img, eg: 300px/300em/300rem
-index_top_img_height:
+# index_top_img_height:
 
 # The subtitle on homepage
+
 subtitle:
-  enable: false
-  # Typewriter Effect
+  enable: true
+  # Typewriter Effect (打字效果)
   effect: true
-  # Customize typed.js
-  # https://github.com/mattboldt/typed.js/#customization
-  typed_option:
-  # Source - Call the third-party service API (Chinese only)
-  # It will show the source first, then show the content of sub
-  # Choose: false/1/2/3
-  # false - disable the function
-  # 1 - hitokoto.cn
-  # 2 - https://api.aa1.cn/doc/yiyan.html
-  # 3 - jinrishici.com
-  source: false
-  # If you close the typewriter effect, the subtitle will only show the first line of sub
+  startDelay: 300 # time before typing starts in milliseconds
+  typeSpeed: 100 # type speed in milliseconds
+  backSpeed: 800 # backspacing speed in milliseconds
+  # loop (循环打字)
+  loop: true
+  # source 调用三方服务
+  # source: false 开关调用
+  # subtitle 会先显示 source , 再显示 sub 的內容
+  source: true
+  # 如果关闭打字效果，subtitle 只会显示 sub 的第一行文字
   sub:
+    - 世界是运行的程序 &#44; 我在行走中debug自己
+    - 用代码作画 &#44; 用文字写诗
 
 # Article layout on the homepage
 # 1: Cover on the left, info on the right
@@ -204,6 +209,7 @@ post_copyright:
   author_href:
   license: CC BY-NC-SA 4.0
   license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
 
 # Sponsor/reward
 reward:
