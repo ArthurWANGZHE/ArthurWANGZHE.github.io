@@ -329,8 +329,89 @@ quantized_model = torch.quantization.quantize_dynamic(
 
 # lightning框架
 
+## Lightning 的核心优势
+
+| 优势             | 说明                                                        |
+| ---------------- | ----------------------------------------------------------- |
+| 更少样板代码     | 不再手写训练循环、验证逻辑                                  |
+| 自动管理训练流程 | 包括 `train_step()`、`val_step()`、日志记录、GPU 加速等 |
+| 模块化 + 易扩展  | 分离模型、数据、训练策略，便于协作和复用                    |
+| 支持分布式训练   | 多卡 / TPU / 混合精度一行代码搞定                           |
+| 集成日志工具     | TensorBoard、W&B 等集成开箱即用                             |
+
+## PyTorch Lightning 架构核心类
+
+### `LightningModule`
+
+封装你的模型结构、前向逻辑、loss、optimizer 等。
+
+### `LightningDataModule`
+
+封装 `train_dataloader()`、`val_dataloader()`、`test_dataloader()` 逻辑。
+
+### `Trainer`
+
+类似于 `.fit()` 的总管。
+
+### 使用示例
+
+```python
+import pytorch_lightning as pl
+import torch.nn as nn
+import torch.nn.functional as F
+import torch
+
+class LitMLP(pl.LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.layer = nn.Sequential(
+            nn.Linear(28 * 28, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10)
+        )
+
+    def forward(self, x):
+        return self.layer(x.view(x.size(0), -1))
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self(x)
+        loss = F.cross_entropy(logits, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=1e-3)
+
+```
+
 # 常见问题
 
-## loss不下降
+## loss不下降/训练不收敛
 
-## 训练不收敛
+
+### 常见原因及排查建议
+
+| 分类                                 | 可能原因                                            | 解决办法                                                                                       |
+| ------------------------------------ | --------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **学习率问题**                 | 学习率过大：震荡不下降``学习率过小：下降极慢 | ✅ 尝试 `1e-2 ~ 1e-5`的范围调整``✅ 引入 LR Scheduler                                 |
+| **数据问题**                   | 标签错、标准化错、数据全为 0 或 1、没打乱           | 🔍 检查数据分布，是否存在泄露、标签错误``✅ 使用 `torchvision.transforms.Normalize()` |
+| **模型结构问题**               | 太浅、激活函数用错、BatchNorm 失效                  | ✅ 加层、使用适当激活函数，如 `ReLU`、`GELU`✅`model.train()`保证 BN 正常工作       |
+| **损失函数问题**               | 类型不匹配（分类用 MSE、回归用 CE）                 | ✅ 确保 task ⇋ loss 一致                                                                      |
+| **优化器问题**                 | 使用不当的优化器参数                                | ✅ 优先尝试 `Adam(lr=1e-3)`✅ SGD 时添加 `momentum=0.9`                               |
+| **梯度问题**                   | 梯度消失 / 爆炸，权重更新不动                       | 🔍 打印 `param.grad`✅ 尝试 `gradient clipping`或查看梯度分布                         |
+| **BatchNorm / Dropout 没关**   | 预测阶段仍在训练模式                                | ✅ 评估时务必 `model.eval()`                                                                 |
+| **初始化问题**                 | 权重初始化太小 / 全为 0 / 偏差过大                  | ✅ 使用 `torch.nn.init`系列，如 `kaiming_uniform_`                                         |
+| **正则 / dropout 过强**        | 模型“学不到东西”                                  | 🔍 试着去掉 dropout 或减弱 L2 penalty                                                          |
+| **过拟合也表现为 loss 上不去** | val loss 很大，train loss 很小                      | ✅ 加数据增强、dropout、提前停止（early stop）                                                 |
+
+---
+
+### 检查步骤
+
+1. **打印训练 batch 的 Loss** （是否在变）
+2. **观察梯度：是否为 None 或全 0**
+3. **画出 loss 曲线** ，是否震荡、上升、平坦
+4. **尝试过拟合一个小 batch** （比如 batch_size=4，跑100轮）：
+
+> 如果不能拟合一个小 batch，大概率是模型或数据的问题
