@@ -88,7 +88,6 @@ PyTorch的核心特性
 | 控制计算图      | `torch.no_grad()`,`tensor.detach()`,`requires_grad_()` |
 | 梯度裁剪        | `torch.nn.utils.clip_grad_norm_()`                         |
 
-
 # 损失函数
 
 > 损失函数（Loss Function）用于衡量模型预测值与真实标签之间的差异，是模型“犯错的程度”。
@@ -122,9 +121,211 @@ PyTorch的核心特性
 
 # 激活函数
 
+> 激活函数是神经网络中作用于每一层（尤其是隐藏层）输出的非线性函数，它决定了模型的**表达能力**和 **收敛速度** 。
+
+如果没有激活函数，多个线性层叠加仍然是线性模型，无法拟合复杂函数。
+
+## 激活函数的作用
+
+1. **引入非线性** ：让网络可以拟合复杂模式（比如图像、语言）
+2. **控制信息流动** ：如 ReLU 可将负值置零，稀疏激活
+3. **影响梯度传播** ：某些激活函数可能导致梯度消失/爆炸
+4. **决定训练速度与收敛效果**
+
+## 常见激活函数汇总（及使用建议）
+
+| 名称                 | 函数表达式                       | PyTorch 写法                  | 特性                             | 适用场景                                  |
+| -------------------- | -------------------------------- | ----------------------------- | -------------------------------- | ----------------------------------------- |
+| **ReLU**       | `max(0, x)`                    | `nn.ReLU()`or `F.relu(x)` | 稀疏激活，收敛快，简单高效       | 默认首选，适合大多数隐藏层                |
+| **Leaky ReLU** | `x if x>0 else αx`            | `nn.LeakyReLU(α)`          | 允许负值通过，缓解“神经元死亡” | ReLU 不收敛时可尝试                       |
+| **PReLU**      | `x if x>0 else a*x`（a可学习） | `nn.PReLU()`                | 可学习负斜率                     | 高级调参用                                |
+| **Sigmoid**    | `1 / (1 + e^-x)`               | `nn.Sigmoid()`              | 输出在 (0,1)，易饱和             | 二分类输出层，不适合深层网络              |
+| **Tanh**       | `(e^x - e^-x)/(e^x + e^-x)`    | `nn.Tanh()`                 | 输出在 (-1,1)，对称              | 曾用于 RNN，现用得少                      |
+| **Softmax**    | `exp(xi) / sum(exp(xj))`       | `F.softmax()`               | 将向量映射为概率分布             | 多分类输出层（配合 `CrossEntropyLoss`） |
+| **Swish**      | `x * sigmoid(x)`               | `x * torch.sigmoid(x)`      | 平滑、可导、近似线性             | 高端模型如 EfficientNet                   |
+| **GELU**       | `x * Φ(x)`（近似正态）        | `nn.GELU()`                 | 用于大模型，如 Transformer       | BERT, GPT 中大量使用                      |
+| **ELU**        | `x if x>0 else α*(e^x - 1)`   | `nn.ELU()`                  | 允许负值，更稳定收敛             | 某些任务比 ReLU 好                        |
+
+## PyTorch 中使用激活函数
+
+### 方法 1：模块式（`nn.ReLU()`）
+
+适用于 `nn.Sequential` 或自定义网络中初始化层时：
+
+```python
+self.relu = nn.ReLU()
+x = self.relu(x)
+```
+
+### 方法 2：函数式（`F.relu()`）
+
+适用于 `forward()` 中灵活调用：
+
+```python
+import torch.nn.functional as F
+
+x = F.relu(x)
+x = F.leaky_relu(x, negative_slope=0.1)
+
+```
+
+## 常见使用场景推荐
+
+| 层/结构                    | 推荐激活函数     | 原因                              |
+| -------------------------- | ---------------- | --------------------------------- |
+| **隐藏层**           | ReLU / LeakyReLU | 快速、稳定、稀疏                  |
+| **RNN单元**          | Tanh / Sigmoid   | 结构限制，经典配置                |
+| **Transformer**      | GELU             | 更平滑，BERT 默认                 |
+| **二分类输出**       | Sigmoid          | 输出 (0,1)，配合 BCE              |
+| **多分类输出**       | Softmax          | 输出为概率分布，配合 CrossEntropy |
+| **深层网络无法收敛** | LeakyReLU / ELU  | 解决 ReLU 死亡问题                |
+
 # 优化器
 
+> 优化器负责根据损失函数计算的梯度， **更新模型的参数（weights）** ，从而逐步让模型表现更好。
+
+PyTorch 中的优化器通常来自 `torch.optim` 模块，它们是各种**梯度下降变种算法**的实现。不同优化器的核心区别是： **如何计算梯度、如何调整学习率、是否用动量、是否自适应调整方向** 。
+
+## 常见优化器总结（PyTorch 实现）
+
+| 优化器                             | 类名                              | 特性                                 | 常用场景                         |
+| ---------------------------------- | --------------------------------- | ------------------------------------ | -------------------------------- |
+| **SGD**                      | `torch.optim.SGD`               | 最基础的随机梯度下降，可加动量       | 小模型、线性分类、强化学习中常见 |
+| **SGD + Momentum**           | `torch.optim.SGD(momentum=0.9)` | 增加惯性，减少震荡                   | 比纯 SGD 更稳定                  |
+| **Adagrad**                  | `torch.optim.Adagrad`           | 自适应学习率，对稀疏数据友好         | NLP, 词向量训练                  |
+| **RMSprop**                  | `torch.optim.RMSprop`           | 类似 Adagrad，但不会让学习率太快衰减 | RNN, LSTM 比较常用               |
+| **Adam**                     | `torch.optim.Adam`              | 自适应+动量，训练快，最常用          | 通用首选，CV/NLP皆可             |
+| **AdamW**                    | `torch.optim.AdamW`             | 修复了 Adam 的正则缺陷               | Transformer 系模型推荐           |
+| **Adadelta / Nadam / RAdam** | …                                | 各种组合优化器                       | 进阶可选                         |
+| **LBFGS**                    | `torch.optim.LBFGS`             | 二阶优化器（拟牛顿法）               | 小模型/调参用，不适合大规模      |
+
+## 选择什么优化器的建议
+
+| 情况                    | 推荐优化器            | 原因                    |
+| ----------------------- | --------------------- | ----------------------- |
+| 通用任务                | `Adam`              | 自动调节学习率 + 收敛快 |
+| 模型发散 / 不收敛       | `SGD`+`Momentum`  | 更稳定，控制力强        |
+| NLP / 稀疏特征          | `Adagrad`,`AdamW` | 更适合稀疏更新          |
+| RNN / LSTM              | `RMSprop`           | 适合处理长序列          |
+| Transformer / BERT      | `AdamW`+ 预热学习率 | 原论文推荐配置          |
+| 需要可解释性 / 手动控制 | `SGD`               | 更好观察梯度更新过程    |
+
+## 优化器常和调度器配合使用
+
+```python
+from torch.optim.lr_scheduler import StepLR
+scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+
+for epoch in range(100):
+    train(...)
+    scheduler.step()
+```
+
+| 调度器                | 功能                         |
+| --------------------- | ---------------------------- |
+| `StepLR`            | 每隔固定步长降低学习率       |
+| `CosineAnnealingLR` | 余弦退火策略                 |
+| `ReduceLROnPlateau` | 当 loss 停止下降时降低学习率 |
+| `OneCycleLR`        | 适用于快速 warmup            |
+| `LambdaLR`          | 自定义调度函数               |
+
 # 模型加速、裁剪、量化
+
+> 模型加速、裁剪、量化是深度学习模型部署和推理优化的重要手段，尤其适用于在 **移动端、嵌入式设备、边缘计算**等资源受限场景中使用 PyTorch 模型。
+
+## 模型加速（Acceleration）
+
+### 方法 1：TorchScript（官方推荐）
+
+```python
+scripted_model = torch.jit.script(model)
+scripted_model.save("model.pt")
+```
+
+优点：保留动态图灵活性，运行时更快、更可移植（如部署到 C++、移动端）
+
+### 方法 2：ONNX 导出 + TensorRT
+
+```python
+torch.onnx.export(model, dummy_input, "model.onnx", ...)
+```
+
+然后用 `onnxruntime` 或 `TensorRT` 部署，可大幅加速推理速度，尤其适合 NVIDIA GPU。
+
+### 方法 3：Operator Fusion
+
+自动将 Conv + BN + ReLU 等合并为一个算子，在 `torch.jit.trace` / `script` 中生效。
+
+## 模型裁剪（Pruning）
+
+> **目的：删除不重要的参数 / 通道，降低模型复杂度**
+
+PyTorch 提供了官方工具包：`torch.nn.utils.prune`
+
+### 示例：对全连接层进行 unstructured pruning
+
+```python
+import torch.nn.utils.prune as prune
+
+prune.random_unstructured(model.fc, name='weight', amount=0.3)
+```
+
+也可以使用 `L1Unstructured`, `RandomStructured`, `LNStructured` 等方式对整个通道/卷积核裁剪。
+
+### 常见策略
+
+| 类型         | 说明                            |
+| ------------ | ------------------------------- |
+| Unstructured | 剪单个权重（稀疏）              |
+| Structured   | 剪整个通道 / 卷积核（硬件友好） |
+
+---
+
+## 模型量化（Quantization）
+
+> **将 float32 的模型参数和激活转为 int8 / float16 表示，以减少模型大小和加速推理。**
+
+PyTorch 支持三种量化方式：
+
+### 静态量化（Post-Training Static Quantization）
+
+```python
+import torch.quantization as quant
+
+model.eval()
+model.qconfig = quant.get_default_qconfig("fbgemm")
+quant.prepare(model, inplace=True)
+# 运行一定量的数据以进行校准
+quant.convert(model, inplace=True)
+```
+
+适用于部署后不再训练的场景，最常用。
+
+### 动态量化（Dynamic Quantization）
+
+对 RNN / Transformer 类模型友好：
+
+```python
+quantized_model = torch.quantization.quantize_dynamic(
+    model, {nn.Linear}, dtype=torch.qint8
+)
+```
+
+### 量化感知训练（QAT）
+
+* 最复杂，但效果最好；
+* 模型训练时模拟量化误差，最终导出更精度友好的模型；
+* 用于对精度非常敏感的部署任务。
+
+## 如何选
+
+| 目的                       | 推荐技术                                        |
+| -------------------------- | ----------------------------------------------- |
+| 加速部署（Web/移动端）     | `TorchScript`,`ONNX`,`TensorRT`           |
+| 模型压缩、训练后导出       | 剪枝 + 静态量化                                 |
+| 推理速度瓶颈（全连接/RNN） | 动态量化                                        |
+| 精度不能丢 + 部署          | 量化感知训练（QAT）                             |
+| Transformer / BERT 模型    | 推荐使用 `AdamW`+ QAT + 融合 LayerNorm/Linear |
 
 # lightning框架
 
