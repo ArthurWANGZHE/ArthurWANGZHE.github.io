@@ -1,6 +1,7 @@
 ---
-title:MUDDFormer论文阅读
+title: MUDDFormer论文阅读
 date: 2025-07-11 12:59:40
+cover: /img/MUDD.jpg
 tags:
 ---
 > **提出了一个新的连接机制** ，可看作是对 Transformer 结构的一种 **通用、兼容性强、性能更优的替代设计** 。
@@ -86,7 +87,9 @@ X_Vᵢ = DA_Vᵢ(X₀, ..., Xᵢ)
 X_Rᵢ = DA_Rᵢ(X₀, ..., Xᵢ)
 ```
 
-![structure](MUDD.png)
+
+
+![MUDD](/img/MUDD.jpg "MUDD")
 
 ```python-repl
 class MultiwayDynamicDenseBlock(nn.Module):
