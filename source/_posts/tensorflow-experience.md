@@ -1,6 +1,7 @@
 ---
 title: Tensorflow面经
 date: 2025-07-09 10:23:58
+cover: /img/Tensorflow.png
 tags:
 ---
 # Tensorflow面经
@@ -25,9 +26,7 @@ tags:
 | **社区活跃度**          | 非常活跃（特别在 HuggingFace、学术界）                     | 稳定庞大，企业用得多                              |
 | **类型提示 / 静态分析** | Pythonic，灵活但容易错                                     | Keras 模型结构更严格，有类型校验                  |
 
-
 # Tensorflow功能模块
-
 
 ### **基础计算核心模块**
 
@@ -39,8 +38,6 @@ tags:
 | `tf.function`     | 将 Python 函数转为图模式，提高性能                  |
 | `tf.math`         | 向量运算、矩阵乘法、广播操作等数学工具              |
 
-
-
 ### **模型构建与训练模块**
 
 | 模块           | 说明                                                                                 |
@@ -50,7 +47,6 @@ tags:
 | `tf.data`    | 高性能数据输入流水线，支持多线程、shuffle、batch、map                                |
 | `tf.train`   | 训练工具（包括 checkpoint、监控、调度器等）                                          |
 | `tf.metrics` | 常见评估指标（准确率、MAE、F1 等）                                                   |
-
 
 ### **部署与生产模块**
 
@@ -64,7 +60,6 @@ tags:
 | `TFLiteConverter` | 模型转换工具，从 Keras/TF → TFLite         |
 | `tf.distribute`   | 分布式训练工具，支持多 GPU / TPU / 多机训练 |
 
-
 ### **工程化 & 工具链模块**
 
 | 模块                               | 说明                                             |
@@ -74,7 +69,6 @@ tags:
 | `tf.config`                      | 设置 GPU 显存策略、设备分配                      |
 | `tf.random`,`tf.initializers`  | 随机数种子、权重初始化等工具                     |
 | `tf.io`,`tf.image`,`tf.text` | 处理数据（图像、文本、TFRecord等）               |
-
 
 # Tensorflow写CNN
 
@@ -91,7 +85,6 @@ x_train = x_train[..., tf.newaxis] / 255.0
 x_test = x_test[..., tf.newaxis] / 255.0
 
 ```
-
 
 ## 构建CNN
 
