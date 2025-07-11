@@ -1,6 +1,6 @@
 ---
-title: MUDDFormer论文阅读/复现
-date: 2025-07-11 11:00:05
+title:MUDDFormer论文阅读
+date: 2025-07-11 12:59:40
 tags:
 ---
 > **提出了一个新的连接机制** ，可看作是对 Transformer 结构的一种 **通用、兼容性强、性能更优的替代设计** 。
@@ -21,13 +21,11 @@ X_L = Layer_L(X_{L-1})
 
 * **顺序传递** ，层与层之间只有一个“输入→输出”通道。
 * 网络变深时，容易出现：
+
   * **梯度消失** （训练难）
   * **表示退化** （深层特征几乎没有新信息）
-
-
 * 跨层信息流被限制在“串行通道”中，远层信息难以传回浅层。
 * 不适合训练非常深的网络。
-
 
 ## 残差连接方式（Residual Connection, ResNet）
 
@@ -42,16 +40,12 @@ X_norm = LayerNorm(X)
 X_out = SubLayer(X_norm) + X
 ```
 
-
 * **跳跃连接** ：允许梯度从深层“跳回”浅层， **缓解梯度消失** 。
 * **恒等路径** ：如果某一层没学到什么，那至少还能“保留原输入”。
 * **训练更稳定** 、 **收敛更快** 。
-
-
 * 所有信息最终都压在一条 residual stream（残差流）上传递，容易过载。
 * 层数很深时，会出现  **representation collapse** （每层的输出特征越来越相似，信息熵下降）。
 * 没有“多源信息聚合”：每层只能依赖前一层的特征。
-
 
 ## MUDD连接方式（Multiway Dynamic Dense）
 
@@ -67,14 +61,14 @@ X_i = Aggregate(X₀, X₁, ..., X_{i-1})
 
 每层不是只接收 $X_{i-1}$，而是从所有 $X_j（j ≤ i-1）$中**聚合**信息。
 
-**Dynamic（动态权重）** 
+**Dynamic（动态权重）**
 
 连接权重不是固定的，而是由当前隐藏状态 X_i  **动态生成** ：
 
 * 对每个序列位置都单独生成权重
 * 更细粒度、更灵活的特征融合方式
 
-**Multiway（多路流）** 
+**Multiway（多路流）**
 
 将输入拆分成：
 
@@ -92,7 +86,7 @@ X_Vᵢ = DA_Vᵢ(X₀, ..., Xᵢ)
 X_Rᵢ = DA_Rᵢ(X₀, ..., Xᵢ)
 ```
 
-![img](snpm install hexo-asset-image --savege\MUDDFormer-experience\MUDD.png)
+![structure](MUDD.png)
 
 ```python-repl
 class MultiwayDynamicDenseBlock(nn.Module):
@@ -119,7 +113,6 @@ class MultiwayDynamicDenseBlock(nn.Module):
         x = tuple([sum(dw[cidx,:,:,j,None] * hids[j] for j in range(self.lidx+2)) for cidx in range(self.C)]) # BTL, LBTD-> BTD
         return x
 ```
-
 
 * 输入：当前层输出 `x`（B, T, D）
 * 输出：动态生成的 dense 聚合权重 `dw`，形状为 `(C, B, T, L)`，表示：
