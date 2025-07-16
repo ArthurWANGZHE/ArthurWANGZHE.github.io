@@ -105,7 +105,7 @@ cover:
   archives_enable: true
   # When cover is not set, the default cover is displayed
   default_cover:
-    /img/hello_world.png
+    /img/background.jpg
 
 # Replace Broken Images
 error_img:
