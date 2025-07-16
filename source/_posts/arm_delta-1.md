@@ -1,9 +1,9 @@
 ---
 title: Delta机械臂（第一版）
 date: 2025-07-16 15:16:48
+series: 机械臂
 tags:
 ---
-
 # Delta机械臂（第一版，Python Qt）项目详解
 
 ## 项目背景

@@ -1,9 +1,9 @@
 ---
-title: delta_error_model
+title: Delta机械臂误差模型
 date: 2025-07-16 15:18:59
+series: 机械臂
 tags:
 ---
-
 # Excon构型误差建模与仿真（Matlab）项目详解
 
 ## 项目简介

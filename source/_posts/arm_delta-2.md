@@ -1,9 +1,9 @@
 ---
-title: delta_2
+title: Delta机械臂(第二版)
 date: 2025-07-16 15:18:05
+series: 机械臂
 tags:
 ---
-
 # Delta机械臂改进版（C++ Qt + 运动控制卡）项目详解
 
 ## 项目背景

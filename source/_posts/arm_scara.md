@@ -1,9 +1,9 @@
 ---
-title: scara
+title: 并联scara机械臂
 date: 2025-07-16 15:20:27
+series: 机械臂
 tags:
 ---
-
 # Scara机械臂系统（C++ Qt）项目详解
 
 ## 项目背景
